@@ -63,7 +63,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.2.1</version>
                 <configuration>
-                    <mainClass>fr.binome.elevator.client.server.ElevatorServer</mainClass>
+                    <mainClass>fr.binome.elevator.server.ElevatorServer</mainClass>
                 </configuration>
             </plugin>
         </plugins>
