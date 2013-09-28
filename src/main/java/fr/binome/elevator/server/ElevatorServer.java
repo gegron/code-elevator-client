@@ -1,4 +1,4 @@
-package CodeElevatorClient;
+package fr.binome.elevator.server;
 
 import spark.Request;
 import spark.Response;
@@ -16,7 +16,7 @@ public class ElevatorServer {
         get(new Route("/hello") {
             @Override
             public Object handle(Request request, Response response) {
-                return "Hello Binôme!";
+                return "Hello World!";
             }
         });
     }
