@@ -1,5 +1,6 @@
 package fr.binome.elevator.server;
 
+import fr.binome.elevator.model.BasicElevator;
 import fr.binome.elevator.model.ElevatorResponse;
 import spark.Request;
 import spark.Response;
@@ -13,6 +14,8 @@ public class ElevatorServer {
 
     public static void main(String[] args) {
         setPort(PORT);
+
+        final BasicElevator elevator = new BasicElevator();
 
         get(new Route("/hello") {
             @Override
@@ -34,6 +37,8 @@ public class ElevatorServer {
         get(new Route("/go") {
             @Override
             public Object handle(Request request, Response response) {
+                elevator.go(request.queryMap("floorToGo").integerValue());
+
                 return "go, floorToGo: " + request.queryParams("floorToGo");
             }
         });
