@@ -16,7 +16,7 @@ public class ElevatorServer {
         get(new Route("/hello") {
             @Override
             public Object handle(Request request, Response response) {
-                return "Hello World!";
+                return "Hello Binôme!";
             }
         });
     }
