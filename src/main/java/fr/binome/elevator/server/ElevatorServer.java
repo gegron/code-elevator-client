@@ -48,7 +48,10 @@ public class ElevatorServer {
         get(new Route("/userHasExited") {
             @Override
             public Object handle(Request request, Response response) {
-                return "userHasExited";
+                response.status(200);
+                response.body("");
+
+                return response.raw();
             }
         });
 
