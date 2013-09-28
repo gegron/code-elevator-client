@@ -29,7 +29,9 @@ public class ElevatorServer {
         get(new Route("/call") {
             @Override
             public Object handle(Request request, Response response) {
-                return "call, at floor: " + request.queryParams("atFloor") + ", to: " + request.queryParams("to");
+                elevator.call(request.queryMap("atFloor").integerValue(), request.queryMap("to").toString());
+
+                return sendOkResponse(response);
             }
         });
 
@@ -39,24 +41,21 @@ public class ElevatorServer {
             public Object handle(Request request, Response response) {
                 elevator.go(request.queryMap("floorToGo").integerValue());
 
-                return "go, floorToGo: " + request.queryParams("floorToGo");
+                return sendOkResponse(response);
             }
         });
 
         get(new Route("/userHasEntered") {
             @Override
             public Object handle(Request request, Response response) {
-                return "userHasEntered";
+                return sendOkResponse(response);
             }
         });
 
         get(new Route("/userHasExited") {
             @Override
             public Object handle(Request request, Response response) {
-                response.status(200);
-                response.body("");
-
-                return response.raw();
+                return sendOkResponse(response);
             }
         });
 
@@ -64,17 +63,26 @@ public class ElevatorServer {
         get(new Route("/reset") {
             @Override
             public Object handle(Request request, Response response) {
-                return "reset";
+                return sendOkResponse(response);
             }
         });
 
         get(new Route("/nextCommand") {
             @Override
             public Object handle(Request request, Response response) {
-                return ElevatorResponse.NOTHING;
+                ElevatorResponse elevatorResponse = elevator.nextCommand();
+
+                return elevatorResponse;
             }
         });
 
+    }
+
+    private static Object sendOkResponse(Response response) {
+        response.status(200);
+        response.body("");
+
+        return response.raw();
     }
 
 }
