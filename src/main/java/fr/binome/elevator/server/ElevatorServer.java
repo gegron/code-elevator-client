@@ -1,5 +1,6 @@
 package fr.binome.elevator.server;
 
+import fr.binome.elevator.model.ElevatorResponse;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -19,6 +20,52 @@ public class ElevatorServer {
                 return "Hello World!";
             }
         });
+
+        // /call?atFloor=[0-5]&to=[UP|DOWN]
+        get(new Route("/call") {
+            @Override
+            public Object handle(Request request, Response response) {
+                return "call, at floor: " + request.queryParams("atFloor") + ", to: " + request.queryParams("to");
+            }
+        });
+
+        // /go?floorToGo=[0-5]
+        get(new Route("/go") {
+            @Override
+            public Object handle(Request request, Response response) {
+                return "go, floorToGo: " + request.queryParams("floorToGo");
+            }
+        });
+
+        get(new Route("/userHasEntered") {
+            @Override
+            public Object handle(Request request, Response response) {
+                return "userHasEntered";
+            }
+        });
+
+        get(new Route("/userHasExited") {
+            @Override
+            public Object handle(Request request, Response response) {
+                return "userHasExited";
+            }
+        });
+
+        // /reset?cause=information+message
+        get(new Route("/reset") {
+            @Override
+            public Object handle(Request request, Response response) {
+                return "reset";
+            }
+        });
+
+        get(new Route("/nextCommand") {
+            @Override
+            public Object handle(Request request, Response response) {
+                return ElevatorResponse.NOTHING;
+            }
+        });
+
     }
 
 }
