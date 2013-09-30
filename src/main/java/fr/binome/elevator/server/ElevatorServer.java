@@ -11,7 +11,7 @@ import static spark.Spark.get;
 import static spark.Spark.setPort;
 
 public class ElevatorServer {
-    private static final int PORT = 8081;
+    private static final int PORT = new Integer(System.getenv("PORT"));
 
     public static void main(String[] args) {
         setPort(PORT);
@@ -23,7 +23,7 @@ public class ElevatorServer {
             @Override
             public Object handle(Request request, Response response) {
                 //Test
-                return "Hello World!";
+                return "Hello world!";
             }
         });
 
