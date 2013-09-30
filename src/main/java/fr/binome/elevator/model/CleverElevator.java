@@ -2,23 +2,29 @@ package fr.binome.elevator.model;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static fr.binome.elevator.model.ElevatorResponse.*;
 
-public class BasicElevator extends Elevator {
-    // public field
-    public Integer finalDestination;
+public class CleverElevator extends Elevator {
 
-    // private field
     private boolean doorsAlreadyOpenAtThisLevel = false;
+
+    private Map<Integer, Boolean> callRecorder = new HashMap<Integer, Boolean>() {{
+        for (int i = MIN_LEVEL; i <= MAX_LEVEL; i++) {
+            put(i, false);
+        }
+    }};
 
     @Override
     public void go(Integer floorToGo) {
-        finalDestination = floorToGo;
+        callRecorder.put(floorToGo, true);
     }
 
     @Override
     public void call(Integer atFloor, String way) {
-        //To change body of created methods use File | Settings | File Templates.
+        callRecorder.put(atFloor, true);
     }
 
     @Override
@@ -27,12 +33,17 @@ public class BasicElevator extends Elevator {
             return closeDoor();
         }
 
-        if (doorsAlreadyOpenAtThisLevel) {
-            return goNextLevel();
-        }
-        else {
+        if (doorsMustOpenAtThisLevel() && !doorsAlreadyOpenAtThisLevel) {
             return openDoor();
         }
+        else {
+            return goNextLevel();
+        }
+    }
+
+    @VisibleForTesting
+    boolean doorsMustOpenAtThisLevel() {
+        return callRecorder.get(currentLevel);
     }
 
     @VisibleForTesting
@@ -56,15 +67,10 @@ public class BasicElevator extends Elevator {
         return way;
     }
 
-    @Override
-    public void reset(String cause) {
-        super.reset(cause);
-
-        doorsAlreadyOpenAtThisLevel = false;
-    }
-
     private ElevatorResponse openDoor() {
         doorsAlreadyOpenAtThisLevel = true;
+
+        callRecorder.put(currentLevel, false);
 
         return stateDoors = OPEN;
     }

@@ -1,6 +1,7 @@
 package fr.binome.elevator.server;
 
-import fr.binome.elevator.model.BasicElevator;
+import fr.binome.elevator.model.CleverElevator;
+import fr.binome.elevator.model.Elevator;
 import fr.binome.elevator.model.ElevatorResponse;
 import spark.Request;
 import spark.Response;
@@ -10,12 +11,13 @@ import static spark.Spark.get;
 import static spark.Spark.setPort;
 
 public class ElevatorServer {
-    private static final int PORT = 8080;
+    private static final int PORT = 8081;
 
     public static void main(String[] args) {
         setPort(PORT);
 
-        final BasicElevator elevator = new BasicElevator();
+//        final Elevator elevator = new BasicElevator();
+        final Elevator elevator = new CleverElevator();
 
         get(new Route("/hello") {
             @Override
@@ -63,6 +65,8 @@ public class ElevatorServer {
         get(new Route("/reset") {
             @Override
             public Object handle(Request request, Response response) {
+                elevator.reset(request.queryMap("cause").toString());
+
                 return sendOkResponse(response);
             }
         });
