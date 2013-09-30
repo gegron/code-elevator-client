@@ -1,11 +1,13 @@
 package fr.binome.elevator.model;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static fr.binome.elevator.model.ElevatorResponse.*;
 import static org.fest.assertions.Assertions.assertThat;
 
+@Ignore
 public class CleverElevatorScenarioTest {
     private CleverElevator cleverElevator;
 

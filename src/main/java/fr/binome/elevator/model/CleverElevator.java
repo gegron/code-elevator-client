@@ -1,15 +1,23 @@
 package fr.binome.elevator.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Ordering;
+import com.sun.istack.internal.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static fr.binome.elevator.model.ElevatorResponse.*;
 
 public class CleverElevator extends Elevator {
 
-    /** TODO: Rethink because of elevator empty + person calls at the current floor **/
+    /**
+     * TODO: Rethink because of elevator empty + person calls at the current floor *
+     */
     private boolean doorsAlreadyOpenAtThisLevel = false;
 
     private Map<Integer, Boolean> destinations = new HashMap<Integer, Boolean>() {{
@@ -78,10 +86,11 @@ public class CleverElevator extends Elevator {
     ElevatorResponse goNextLevel() {
         doorsAlreadyOpenAtThisLevel = false;
 
-        if (way == UP) {
+        if (way == UP && currentLevel < getHighestLevelToGo()) {
             currentLevel++;
         }
-        else {
+
+        if (way == DOWN && currentLevel > getLowestLevelToGo()) {
             currentLevel--;
         }
 
@@ -92,11 +101,42 @@ public class CleverElevator extends Elevator {
         return result;
     }
 
+    @VisibleForTesting
+    int getLowestLevelToGo() {
+        List<Integer> levelToHalt = new ArrayList<Integer>();
+
+        Iterables.addAll(levelToHalt, filterTrueValue(destinations));
+        Iterables.addAll(levelToHalt, filterTrueValue(callsUp));
+        Iterables.addAll(levelToHalt, filterTrueValue(callsDown));
+
+        return Ordering.<Integer>natural().min(levelToHalt);
+    }
+
+    @VisibleForTesting
+    int getHighestLevelToGo() {
+        List<Integer> levelToHalt = new ArrayList<Integer>();
+
+        Iterables.addAll(levelToHalt, filterTrueValue(destinations));
+        Iterables.addAll(levelToHalt, filterTrueValue(callsUp));
+        Iterables.addAll(levelToHalt, filterTrueValue(callsDown));
+
+        return Ordering.<Integer>natural().max(levelToHalt);
+    }
+
+    private Iterable<Integer> filterTrueValue(final Map<Integer, Boolean> map) {
+        return Iterables.filter(map.keySet(), new Predicate<Integer>() {
+            @Override
+            public boolean apply(@Nullable Integer level) {
+                return map.get(level);
+            }
+        });
+    }
+
     private void initWayForNextTick() {
-        if (way == UP && currentLevel == MAX_LEVEL) {
+        if (way == UP && currentLevel == getHighestLevelToGo()) {
             way = DOWN;
         }
-        else if (way == DOWN && currentLevel == MIN_LEVEL) {
+        else if (way == DOWN && currentLevel == getLowestLevelToGo()) {
             way = UP;
         }
     }
