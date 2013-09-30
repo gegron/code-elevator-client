@@ -78,13 +78,6 @@ public class CleverElevator extends Elevator {
     ElevatorResponse goNextLevel() {
         doorsAlreadyOpenAtThisLevel = false;
 
-        if (way == UP && currentLevel == MAX_LEVEL) {
-            way = DOWN;
-        }
-        else if (way == DOWN && currentLevel == MIN_LEVEL) {
-            way = UP;
-        }
-
         if (way == UP) {
             currentLevel++;
         }
@@ -92,7 +85,20 @@ public class CleverElevator extends Elevator {
             currentLevel--;
         }
 
-        return way;
+        ElevatorResponse result = way;
+
+        initWayForNextTick();
+
+        return result;
+    }
+
+    private void initWayForNextTick() {
+        if (way == UP && currentLevel == MAX_LEVEL) {
+            way = DOWN;
+        }
+        else if (way == DOWN && currentLevel == MIN_LEVEL) {
+            way = UP;
+        }
     }
 
     private ElevatorResponse openDoor() {
