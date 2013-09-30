@@ -31,7 +31,7 @@ public class ElevatorServer {
         get(new Route("/call") {
             @Override
             public Object handle(Request request, Response response) {
-                elevator.call(request.queryMap("atFloor").integerValue(), request.queryMap("to").toString());
+                elevator.call(request.queryMap("atFloor").integerValue(), request.queryMap("to").value());
 
                 return sendOkResponse(response);
             }
