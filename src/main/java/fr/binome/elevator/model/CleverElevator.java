@@ -79,7 +79,7 @@ public class CleverElevator extends Elevator {
     @VisibleForTesting
     boolean doorsMustOpenAtThisLevel() {
         Map<Integer, Boolean> calls = getCalls(way);
-        boolean mustOpen = false;
+        boolean mustOpen;
 
         // Special case if we are at the maximum level or minimum level:
         //  in that case we open the doors to passengers going in the other way (they can only go one way)
@@ -96,7 +96,6 @@ public class CleverElevator extends Elevator {
     @VisibleForTesting
     ElevatorResponse nextWay() {
         doorsAlreadyOpenAtThisLevel = false;
-        ElevatorResponse result = NOTHING;
 
         if (way == UP && !needToGoUp()) {
             if (needToGoDown()) {
@@ -134,15 +133,6 @@ public class CleverElevator extends Elevator {
         }
         else if (way == DOWN)  {
             currentLevel--;
-        }
-    }
-
-    private void initWayForNextTick() {
-        if (way == UP && currentLevel == MAX_LEVEL) {
-            way = DOWN;
-        }
-        else if (way == DOWN && currentLevel == MIN_LEVEL) {
-            way = UP;
         }
     }
 
