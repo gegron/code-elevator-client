@@ -31,12 +31,9 @@ public class CleverElevatorScenarioTest {
         // 3rd level
         assertThat(cleverElevator.nextCommand()).isEqualTo(OPEN);
         assertThat(cleverElevator.nextCommand()).isEqualTo(CLOSE);
-        assertThat(cleverElevator.nextCommand()).isEqualTo(UP);
+        assertThat(cleverElevator.nextCommand()).isEqualTo(NOTHING);
 
         cleverElevator.go(1);
-
-        // 4rd level
-        assertThat(cleverElevator.nextCommand()).isEqualTo(UP);
 
         // 5rd level
         assertThat(cleverElevator.nextCommand()).isEqualTo(DOWN);
@@ -44,19 +41,13 @@ public class CleverElevatorScenarioTest {
         // 4rd level
         assertThat(cleverElevator.nextCommand()).isEqualTo(DOWN);
 
-        // 3rd level
-        assertThat(cleverElevator.nextCommand()).isEqualTo(DOWN);
-
-        // 2nd level
-        assertThat(cleverElevator.nextCommand()).isEqualTo(DOWN);
-
         // 1st level
         assertThat(cleverElevator.nextCommand()).isEqualTo(OPEN);
         assertThat(cleverElevator.nextCommand()).isEqualTo(CLOSE);
-        assertThat(cleverElevator.nextCommand()).isEqualTo(DOWN);
+        assertThat(cleverElevator.nextCommand()).isEqualTo(NOTHING);
 
-        // 0 level
-        assertThat(cleverElevator.nextCommand()).isEqualTo(UP);
+        // 1st level
+        assertThat(cleverElevator.nextCommand()).isEqualTo(NOTHING);
     }
 
     @Test
@@ -76,7 +67,7 @@ public class CleverElevatorScenarioTest {
         // 3rd level
         assertThat(cleverElevator.nextCommand()).isEqualTo(OPEN);
         assertThat(cleverElevator.nextCommand()).isEqualTo(CLOSE);
-        assertThat(cleverElevator.nextCommand()).isEqualTo(UP);
+        assertThat(cleverElevator.nextCommand()).isEqualTo(NOTHING);
     }
 
     @Test
@@ -139,7 +130,7 @@ public class CleverElevatorScenarioTest {
         // Level 0
         assertThat(cleverElevator.nextCommand()).isEqualTo(OPEN);
         assertThat(cleverElevator.nextCommand()).isEqualTo(CLOSE);
-        assertThat(cleverElevator.nextCommand()).isEqualTo(UP);
+        assertThat(cleverElevator.nextCommand()).isEqualTo(NOTHING);
     }
 
     @Test
@@ -155,7 +146,7 @@ public class CleverElevatorScenarioTest {
         // 5th level
         assertThat(cleverElevator.nextCommand()).isEqualTo(OPEN);
         assertThat(cleverElevator.nextCommand()).isEqualTo(CLOSE);
-        assertThat(cleverElevator.nextCommand()).isEqualTo(DOWN);
+        assertThat(cleverElevator.nextCommand()).isEqualTo(NOTHING);
     }
 
 }

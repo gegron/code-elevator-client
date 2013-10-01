@@ -45,6 +45,10 @@ public class CleverElevator extends Elevator {
         return getCalls(inWay.name());
     }
 
+    private boolean isCalledBy(int byI) {
+        return (callsUp.get(byI) || callsDown.get(byI));
+    }
+
     @Override
     public void go(Integer floorToGo) {
         destinations.put(floorToGo, true);
@@ -52,7 +56,10 @@ public class CleverElevator extends Elevator {
 
     @Override
     public void call(Integer atFloor, String inWay) {
-        getCalls(inWay).put(atFloor, true);
+        Map<Integer, Boolean> calls = getCalls(inWay);
+        if (calls != null) {
+            calls.put(atFloor, true);
+        }
     }
 
     @Override
@@ -65,31 +72,69 @@ public class CleverElevator extends Elevator {
             return openDoor();
         }
         else {
-            return goNextLevel();
+            return nextWay();
         }
     }
 
     @VisibleForTesting
     boolean doorsMustOpenAtThisLevel() {
-        return (destinations.get(currentLevel) || getCalls(way).get(currentLevel));
+        Map<Integer, Boolean> calls = getCalls(way);
+        boolean mustOpen = false;
+
+        // Special case if we are at the maximum level or minimum level:
+        //  in that case we open the doors to passengers going in the other way (they can only go one way)
+        if (currentLevel == MIN_LEVEL || currentLevel == MAX_LEVEL) {
+            mustOpen = isCalledBy(currentLevel);
+        }
+        else {
+            mustOpen = (calls != null && calls.get(currentLevel));
+        }
+
+        return (destinations.get(currentLevel) || mustOpen);
     }
 
     @VisibleForTesting
-    ElevatorResponse goNextLevel() {
+    ElevatorResponse nextWay() {
         doorsAlreadyOpenAtThisLevel = false;
+        ElevatorResponse result = NOTHING;
 
+        if (way == UP && !needToGoUp()) {
+            if (needToGoDown()) {
+                way = DOWN;
+            }
+            else {
+                way = NOTHING;
+            }
+        }
+        if (way == DOWN && !needToGoDown()) {
+            if (needToGoUp()) {
+                way = UP;
+            }
+            else {
+                way = NOTHING;
+            }
+        }
+        if (way == NOTHING) {
+            if (needToGoUp()) {
+                way = UP;
+            }
+            else if (needToGoDown()) {
+                way = DOWN;
+            }
+        }
+
+        adjustLevel();
+
+        return way;
+    }
+
+    private void adjustLevel() {
         if (way == UP) {
             currentLevel++;
         }
-        else {
+        else if (way == DOWN)  {
             currentLevel--;
         }
-
-        ElevatorResponse result = way;
-
-        initWayForNextTick();
-
-        return result;
     }
 
     private void initWayForNextTick() {
@@ -101,11 +146,56 @@ public class CleverElevator extends Elevator {
         }
     }
 
+    private boolean needToGoUp() {
+        return (atLeastOneHeadedUp() || atLeastOneCallHigher());
+    }
+
+    private boolean needToGoDown() {
+        return (atLeastOneHeadedDown() || atLeastOneCallLower());
+    }
+
+    private boolean atLeastOneHeadedUp() {
+        boolean res = false;
+        for (int i = currentLevel+1 ; i <= MAX_LEVEL; i++) {
+            res = res || destinations.get(i);
+        }
+
+        return res;
+    }
+
+    private boolean atLeastOneHeadedDown() {
+        boolean res = false;
+        for (int i = currentLevel-1 ; i >= MIN_LEVEL; i--) {
+            res = res || destinations.get(i);
+        }
+
+        return res;
+    }
+
+    private boolean atLeastOneCallHigher() {
+        boolean res = false;
+        for (int i = currentLevel+1 ; i <= MAX_LEVEL; i++) {
+            res = res || isCalledBy(i);
+        }
+
+        return res;
+    }
+
+    private boolean atLeastOneCallLower() {
+        boolean res = false;
+        for (int i = currentLevel-1 ; i >= MIN_LEVEL; i--) {
+            res = res || isCalledBy(i);
+        }
+
+        return res;
+    }
+
     private ElevatorResponse openDoor() {
         doorsAlreadyOpenAtThisLevel = true;
 
         destinations.put(currentLevel, false);
-        getCalls(way).put(currentLevel, false);
+        callsUp.put(currentLevel, false);
+        callsDown.put(currentLevel, false);
 
         return stateDoors = OPEN;
     }

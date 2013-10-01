@@ -22,7 +22,7 @@ public class CleverElevatorTest {
         cleverElevator.currentLevel = 2;
 
         // When
-        assertThat(cleverElevator.goNextLevel()).isEqualTo(UP);
+        assertThat(cleverElevator.nextWay()).isEqualTo(UP);
         assertThat(cleverElevator.currentLevel).isEqualTo(3);
     }
 
@@ -33,7 +33,7 @@ public class CleverElevatorTest {
         cleverElevator.currentLevel = 5;
 
         // When
-        assertThat(cleverElevator.goNextLevel()).isEqualTo(DOWN);
+        assertThat(cleverElevator.nextWay()).isEqualTo(DOWN);
         assertThat(cleverElevator.way).isEqualTo(DOWN);
         assertThat(cleverElevator.currentLevel).isEqualTo(4);
     }
@@ -45,7 +45,7 @@ public class CleverElevatorTest {
         cleverElevator.currentLevel = 0;
 
         // When
-        assertThat(cleverElevator.goNextLevel()).isEqualTo(UP);
+        assertThat(cleverElevator.nextWay()).isEqualTo(UP);
         assertThat(cleverElevator.way).isEqualTo(UP);
         assertThat(cleverElevator.currentLevel).isEqualTo(1);
     }
