@@ -16,10 +16,11 @@ public class CleverElevatorTest {
     }
 
     @Test
-    public void should_go_up_level_when_elevator_way_is_up() {
+    public void should_go_up_level_when_elevator_way_is_up_and_call_higer() {
         // Given
         cleverElevator.way = UP;
         cleverElevator.currentLevel = 2;
+        cleverElevator.call(4, "UP");
 
         // When
         assertThat(cleverElevator.nextWay()).isEqualTo(UP);
@@ -27,10 +28,11 @@ public class CleverElevatorTest {
     }
 
     @Test
-    public void should_go_down_level_when_elevator_reach_max_level() {
+    public void should_go_down_level_when_elevator_reach_max_level_and_call_lower() {
         // Given
         cleverElevator.way = UP;
         cleverElevator.currentLevel = 5;
+        cleverElevator.call(4, "DOWN");
 
         // When
         assertThat(cleverElevator.nextWay()).isEqualTo(DOWN);
@@ -39,10 +41,11 @@ public class CleverElevatorTest {
     }
 
     @Test
-    public void should_go_up_level_when_elevator_reach_min_level() {
+    public void should_go_up_level_when_elevator_reach_min_level_and_call_higher() {
         // Given
         cleverElevator.way = DOWN;
         cleverElevator.currentLevel = 0;
+        cleverElevator.call(3, "UP");
 
         // When
         assertThat(cleverElevator.nextWay()).isEqualTo(UP);
