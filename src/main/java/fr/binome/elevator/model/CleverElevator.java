@@ -4,8 +4,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
-import com.sun.istack.internal.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -145,7 +145,8 @@ public class CleverElevator extends Elevator {
         doorsAlreadyOpenAtThisLevel = true;
 
         destinations.put(currentLevel, false);
-        getCalls(way).put(currentLevel, false);
+        callsUp.put(currentLevel, false);
+        callsDown.put(currentLevel, false);
 
         return stateDoors = OPEN;
     }
