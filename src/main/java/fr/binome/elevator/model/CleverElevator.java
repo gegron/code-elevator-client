@@ -15,10 +15,7 @@ import static fr.binome.elevator.model.ElevatorResponse.*;
 
 public class CleverElevator extends Elevator {
 
-    /**
-     * TODO: Rethink because of elevator empty + person calls at the current floor *
-     */
-    private boolean doorsAlreadyOpenAtThisLevel = false;
+    private int capacityMax = 3;
 
     private Map<Integer, Boolean> destinations = new HashMap<Integer, Boolean>() {{
         for (int i = MIN_LEVEL; i <= MAX_LEVEL; i++) {
@@ -69,7 +66,7 @@ public class CleverElevator extends Elevator {
             return closeDoor();
         }
 
-        if (doorsMustOpenAtThisLevel() && !doorsAlreadyOpenAtThisLevel) {
+        if (doorsMustOpenAtThisLevel()) {
             return openDoor();
         }
         else {
@@ -77,14 +74,21 @@ public class CleverElevator extends Elevator {
         }
     }
 
+    private boolean elevatorCapacityAccept() {
+        return userCount <= capacityMax || exceptionLevel();
+    }
+
+    private boolean exceptionLevel() {
+        return (1 == currentLevel && callsDown.get(1)) || (4 == currentLevel && callsUp.get(4));
+    }
+
     @VisibleForTesting
     boolean doorsMustOpenAtThisLevel() {
-        return (destinations.get(currentLevel) || getCalls(way).get(currentLevel));
+        return (destinations.get(currentLevel) || (getCalls(way).get(currentLevel) && elevatorCapacityAccept()));
     }
 
     @VisibleForTesting
     ElevatorResponse goNextLevel() {
-        doorsAlreadyOpenAtThisLevel = false;
 
         if (way == UP && currentLevel < getHighestLevelToGo()) {
             currentLevel++;
@@ -142,7 +146,6 @@ public class CleverElevator extends Elevator {
     }
 
     private ElevatorResponse openDoor() {
-        doorsAlreadyOpenAtThisLevel = true;
 
         destinations.put(currentLevel, false);
         callsUp.put(currentLevel, false);

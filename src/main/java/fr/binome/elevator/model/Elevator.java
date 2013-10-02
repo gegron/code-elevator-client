@@ -12,6 +12,7 @@ public abstract class Elevator {
     ElevatorResponse way = UP;
     int currentLevel = 0;
     ElevatorResponse stateDoors = CLOSE;
+    int userCount = 0;
 
     public abstract void go(Integer floorToGo);
 
@@ -23,6 +24,15 @@ public abstract class Elevator {
         way = UP;
         currentLevel = 0;
         stateDoors = CLOSE;
+        userCount = 0;
+    }
+
+    public void userHasEntered() {
+        userCount++;
+    }
+
+    public void userHasExited() {
+        userCount--;
     }
 
 }

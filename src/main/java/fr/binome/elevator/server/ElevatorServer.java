@@ -50,6 +50,8 @@ public class ElevatorServer {
         get(new Route("/userHasEntered") {
             @Override
             public Object handle(Request request, Response response) {
+                elevator.userHasEntered();
+
                 return sendOkResponse(response);
             }
         });
@@ -57,6 +59,8 @@ public class ElevatorServer {
         get(new Route("/userHasExited") {
             @Override
             public Object handle(Request request, Response response) {
+                elevator.userHasExited();
+
                 return sendOkResponse(response);
             }
         });
