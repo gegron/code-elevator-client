@@ -9,7 +9,7 @@ import static fr.binome.elevator.model.ElevatorResponse.*;
 
 public class CleverElevator extends Elevator {
 
-    /** TODO: Rethink because of elevator empty + person calls at the current floor **/
+    // TODO: Rethink because of elevator empty + person calls at the current floor
     private boolean doorsAlreadyOpenAtThisLevel = false;
 
     private Map<Integer, Boolean> destinations = new HashMap<Integer, Boolean>() {{
@@ -45,10 +45,6 @@ public class CleverElevator extends Elevator {
         return getCalls(inWay.name());
     }
 
-    private boolean isCalledBy(int byI) {
-        return (callsUp.get(byI) || callsDown.get(byI));
-    }
-
     @Override
     public void go(Integer floorToGo) {
         destinations.put(floorToGo, true);
@@ -57,6 +53,7 @@ public class CleverElevator extends Elevator {
     @Override
     public void call(Integer atFloor, String inWay) {
         Map<Integer, Boolean> calls = getCalls(inWay);
+
         if (calls != null) {
             calls.put(atFloor, true);
         }
@@ -74,6 +71,10 @@ public class CleverElevator extends Elevator {
         else {
             return nextWay();
         }
+    }
+
+    private boolean isCalledBy(int byI) {
+        return (callsUp.get(byI) || callsDown.get(byI));
     }
 
     @VisibleForTesting
@@ -105,6 +106,7 @@ public class CleverElevator extends Elevator {
                 way = NOTHING;
             }
         }
+
         if (way == DOWN && !needToGoDown()) {
             if (needToGoUp()) {
                 way = UP;
@@ -113,6 +115,7 @@ public class CleverElevator extends Elevator {
                 way = NOTHING;
             }
         }
+
         if (way == NOTHING) {
             if (needToGoUp()) {
                 way = UP;
@@ -131,7 +134,7 @@ public class CleverElevator extends Elevator {
         if (way == UP) {
             currentLevel++;
         }
-        else if (way == DOWN)  {
+        else if (way == DOWN) {
             currentLevel--;
         }
     }
@@ -146,7 +149,8 @@ public class CleverElevator extends Elevator {
 
     private boolean atLeastOneHeadedUp() {
         boolean res = false;
-        for (int i = currentLevel+1 ; i <= MAX_LEVEL; i++) {
+
+        for (int i = currentLevel + 1; i <= MAX_LEVEL; i++) {
             res = res || destinations.get(i);
         }
 
@@ -155,7 +159,8 @@ public class CleverElevator extends Elevator {
 
     private boolean atLeastOneHeadedDown() {
         boolean res = false;
-        for (int i = currentLevel-1 ; i >= MIN_LEVEL; i--) {
+
+        for (int i = currentLevel - 1; i >= MIN_LEVEL; i--) {
             res = res || destinations.get(i);
         }
 
@@ -164,7 +169,8 @@ public class CleverElevator extends Elevator {
 
     private boolean atLeastOneCallHigher() {
         boolean res = false;
-        for (int i = currentLevel+1 ; i <= MAX_LEVEL; i++) {
+
+        for (int i = currentLevel + 1; i <= MAX_LEVEL; i++) {
             res = res || isCalledBy(i);
         }
 
@@ -173,7 +179,8 @@ public class CleverElevator extends Elevator {
 
     private boolean atLeastOneCallLower() {
         boolean res = false;
-        for (int i = currentLevel-1 ; i >= MIN_LEVEL; i--) {
+
+        for (int i = currentLevel - 1; i >= MIN_LEVEL; i--) {
             res = res || isCalledBy(i);
         }
 
