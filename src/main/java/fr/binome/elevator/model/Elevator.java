@@ -5,7 +5,7 @@ import static fr.binome.elevator.model.ElevatorResponse.UP;
 
 public abstract class Elevator {
     // Elevator rules
-    protected final int MAX_LEVEL = 5;
+    protected final int MAX_LEVEL = 20;
     protected final int MIN_LEVEL = 0;
 
     // package protected field
