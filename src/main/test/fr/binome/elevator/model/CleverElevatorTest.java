@@ -109,4 +109,35 @@ public class CleverElevatorTest {
         assertThat(result).isFalse();
     }
 
+    @Test
+    public void should_return_highest_level_with_call() {
+        assertThat(cleverElevator.getHighestCallLevel()).isEqualTo(Elevator.MAX_LEVEL);
+
+        cleverElevator.call(1, "DOWN");
+        assertThat(cleverElevator.getHighestCallLevel()).isEqualTo(1);
+
+        cleverElevator.call(0, "DOWN");
+        assertThat(cleverElevator.getHighestCallLevel()).isEqualTo(1);
+
+        cleverElevator.call(4, "DOWN");
+        assertThat(cleverElevator.getHighestCallLevel()).isEqualTo(4);
+    }
+
+    @Test
+    public void should_return_lowest_level_with_call() {
+        assertThat(cleverElevator.getLowestCallLevel()).isEqualTo(Elevator.MIN_LEVEL);
+
+        cleverElevator.call(4, "DOWN");
+        assertThat(cleverElevator.getLowestCallLevel()).isEqualTo(4);
+
+        cleverElevator.call(5, "DOWN");
+        assertThat(cleverElevator.getLowestCallLevel()).isEqualTo(4);
+
+        cleverElevator.call(2, "DOWN");
+        assertThat(cleverElevator.getLowestCallLevel()).isEqualTo(2);
+
+        cleverElevator.call(0, "DOWN");
+        assertThat(cleverElevator.getLowestCallLevel()).isEqualTo(0);
+    }
+
 }

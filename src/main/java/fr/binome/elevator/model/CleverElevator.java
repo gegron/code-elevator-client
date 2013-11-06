@@ -1,8 +1,14 @@
 package fr.binome.elevator.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static fr.binome.elevator.model.ElevatorResponse.*;
@@ -30,11 +36,12 @@ public class CleverElevator extends Elevator {
         }
     }};
 
-    private Map<Integer, Boolean> getCalls(String inWay) {
-        if (ElevatorResponse.valueOf(inWay) == UP) {
+    private Map<Integer, Boolean> getCalls(String way) {
+        if (ElevatorResponse.valueOf(way) == UP) {
             return callsUp;
         }
-        if (ElevatorResponse.valueOf(inWay) == DOWN) {
+
+        if (ElevatorResponse.valueOf(way) == DOWN) {
             return callsDown;
         }
 
@@ -51,11 +58,11 @@ public class CleverElevator extends Elevator {
     }
 
     @Override
-    public void call(Integer atFloor, String inWay) {
-        Map<Integer, Boolean> calls = getCalls(inWay);
+    public void call(Integer floorLevel, String way) {
+        Map<Integer, Boolean> calls = getCalls(way);
 
         if (calls != null) {
-            calls.put(atFloor, true);
+            calls.put(floorLevel, true);
         }
     }
 
@@ -73,8 +80,8 @@ public class CleverElevator extends Elevator {
         }
     }
 
-    private boolean isCalledBy(int byI) {
-        return (callsUp.get(byI) || callsDown.get(byI));
+    private boolean hasAtLeastOneCallNoMatterWay(int level) {
+        return (callsUp.get(level) || callsDown.get(level));
     }
 
     @VisibleForTesting
@@ -84,14 +91,46 @@ public class CleverElevator extends Elevator {
 
         // Special case if we are at the maximum level or minimum level:
         //  in that case we open the doors to passengers going in the other way (they can only go one way)
-        if (currentLevel == MIN_LEVEL || currentLevel == MAX_LEVEL) {
-            mustOpen = isCalledBy(currentLevel);
+        if ((way == DOWN && currentLevel == getLowestCallLevel()) || (way == UP && currentLevel == getHighestCallLevel())) {
+            mustOpen = hasAtLeastOneCallNoMatterWay(currentLevel);
         }
         else {
             mustOpen = (calls != null && calls.get(currentLevel));
         }
 
         return (destinations.get(currentLevel) || mustOpen);
+    }
+
+    @VisibleForTesting
+    Integer getHighestCallLevel() {
+        List<Integer> allCalls = Lists.newArrayList();
+
+        allCalls.addAll(filterTrue(destinations));
+        allCalls.addAll(filterTrue(callsUp));
+        allCalls.addAll(filterTrue(callsDown));
+
+        return allCalls.isEmpty() ? MAX_LEVEL : Ordering.natural().max(allCalls);
+    }
+
+    @VisibleForTesting
+    Integer getLowestCallLevel() {
+        List<Integer> allCalls = Lists.newArrayList();
+
+        allCalls.addAll(filterTrue(destinations));
+        allCalls.addAll(filterTrue(callsUp));
+        allCalls.addAll(filterTrue(callsDown));
+
+        return allCalls.isEmpty() ? MIN_LEVEL : Ordering.natural().min(allCalls);
+    }
+
+    private List<Integer> filterTrue(final Map<Integer, Boolean> calls) {
+
+        return Lists.newArrayList(Iterables.filter(calls.keySet(), new Predicate<Integer>() {
+            @Override
+            public boolean apply(@Nullable Integer level) {
+                return calls.get(level);
+            }
+        }));
     }
 
     @VisibleForTesting
@@ -171,7 +210,7 @@ public class CleverElevator extends Elevator {
         boolean res = false;
 
         for (int i = currentLevel + 1; i <= MAX_LEVEL; i++) {
-            res = res || isCalledBy(i);
+            res = res || hasAtLeastOneCallNoMatterWay(i);
         }
 
         return res;
@@ -181,7 +220,7 @@ public class CleverElevator extends Elevator {
         boolean res = false;
 
         for (int i = currentLevel - 1; i >= MIN_LEVEL; i--) {
-            res = res || isCalledBy(i);
+            res = res || hasAtLeastOneCallNoMatterWay(i);
         }
 
         return res;
