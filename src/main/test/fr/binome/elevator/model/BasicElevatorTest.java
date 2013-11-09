@@ -43,12 +43,12 @@ public class BasicElevatorTest {
     public void should_go_down_level_when_elevator_reach_max_level() {
         // Given
         basicElevator.way = UP;
-        basicElevator.currentLevel = 5;
+        basicElevator.currentLevel = Elevator.MAX_LEVEL;
 
         // When
         assertThat(basicElevator.goNextLevel()).isEqualTo(DOWN);
         assertThat(basicElevator.way).isEqualTo(DOWN);
-        assertThat(basicElevator.currentLevel).isEqualTo(4);
+        assertThat(basicElevator.currentLevel).isEqualTo(Elevator.MAX_LEVEL - 1);
     }
 
     @Test
