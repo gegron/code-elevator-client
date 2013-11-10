@@ -28,7 +28,7 @@ public class PointContextTest {
         PointContext pointContext = new PointContext();
 
         // When
-        Integer result = pointContext.findNearestLevelWithMaxPoint(3);
+        Integer result = pointContext.findCallLevelWithMaxPoints(3);
 
         // Then
         assertThat(result).isNull();
@@ -44,7 +44,7 @@ public class PointContextTest {
         pointContext.call(4, UP);
 
         // When
-        Integer result = pointContext.findNearestLevelWithMaxPoint(1);
+        Integer result = pointContext.findCallLevelWithMaxPoints(1);
 
         // Then
         assertThat(result).isEqualTo(2);
@@ -60,7 +60,7 @@ public class PointContextTest {
         pointContext.call(4, UP);
 
         // When
-        Integer result = pointContext.findNearestLevelWithMaxPoint(1);
+        Integer result = pointContext.findCallLevelWithMaxPoints(1);
 
         // Then
         assertThat(result).isEqualTo(4);
@@ -77,7 +77,7 @@ public class PointContextTest {
         pointContext.call(4, UP);
 
         // When
-        Integer result = pointContext.findNearestLevelWithMaxPoint(1);
+        Integer result = pointContext.findCallLevelWithMaxPoints(1);
 
         // Then
         assertThat(result).isEqualTo(2);

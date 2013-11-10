@@ -14,12 +14,35 @@ public class PointContext {
 
     final static Integer BASE_POINT = 22;
     private Map<Integer, InformationLevel> callPoints = new HashMap<>();
+    private Map<Integer, InformationLevel> goPoints = new HashMap<>();
 
-    public Integer findNearestLevelWithMaxPoint(Integer currentLevel) {
+    public void call(Integer floorToGo, ElevatorResponse way) {
+        addPoints(callPoints, floorToGo, way);
+    }
+
+    public void go(Integer floorToGo) {
+        addPoints(goPoints, floorToGo, null);
+    }
+
+    public Integer findCallLevelWithMaxPoints(Integer currentLevel) {
+        return findNearestLevelWithMaxPoints(callPoints, currentLevel);
+    }
+
+    public Integer findGoLevelWithMaxPoints(Integer currentLevel) {
+        return findNearestLevelWithMaxPoints(goPoints, currentLevel);
+    }
+
+    public Integer getPoints(Integer floor) {
+        InformationLevel informationLevel = callPoints.get(floor);
+
+        return informationLevel != null ? informationLevel.points : null;
+    }
+
+    Integer findNearestLevelWithMaxPoints(Map<Integer, InformationLevel> points, Integer currentLevel) {
         Integer nearestLevel = null;
         Integer maxPoint = 0;
 
-        for (Map.Entry<Integer, InformationLevel> entry : callPoints.entrySet()) {
+        for (Map.Entry<Integer, InformationLevel> entry : points.entrySet()) {
             if ((entry.getValue().points - Math.abs(currentLevel - entry.getKey())) > maxPoint) {
                 nearestLevel = entry.getKey();
                 maxPoint = entry.getValue().points - Math.abs(currentLevel - entry.getKey());
@@ -29,26 +52,20 @@ public class PointContext {
         return nearestLevel;
     }
 
-    void decreaseAllLevelPoints() {
-        for (InformationLevel informationLevel : callPoints.values()) {
-            informationLevel.decreasePoints();
-        }
-    }
-
-    public void call(Integer floorToGo, ElevatorResponse way) {
-        InformationLevel informationLevel = callPoints.get(floorToGo);
+    void addPoints(Map<Integer, InformationLevel> points, Integer floorToGo, ElevatorResponse way) {
+        InformationLevel informationLevel = points.get(floorToGo);
 
         if (informationLevel == null) {
             informationLevel = new InformationLevel();
         }
 
-        callPoints.put(floorToGo, informationLevel.addUser(way));
+        points.put(floorToGo, informationLevel.addUser(way));
     }
 
-    public Integer getPoints(Integer floor) {
-        InformationLevel informationLevel = callPoints.get(floor);
-
-        return informationLevel != null ? informationLevel.points : null;
+    void decreaseAllLevelPoints() {
+        for (InformationLevel informationLevel : callPoints.values()) {
+            informationLevel.decreasePoints();
+        }
     }
 
     private class InformationLevel {

@@ -8,6 +8,7 @@ public class MaxPointElevator extends Elevator {
 
     @Override
     public void go(Integer floorToGo) {
+        context.go(floorToGo);
     }
 
     @Override
