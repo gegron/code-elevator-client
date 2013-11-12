@@ -50,6 +50,8 @@ public class ElevatorServer {
         get(new Route("/userHasEntered") {
             @Override
             public Object handle(Request request, Response response) {
+                elevator.userHasEntered();
+
                 return sendOkResponse(response);
             }
         });
@@ -57,6 +59,8 @@ public class ElevatorServer {
         get(new Route("/userHasExited") {
             @Override
             public Object handle(Request request, Response response) {
+                elevator.userHasExited();
+
                 return sendOkResponse(response);
             }
         });
@@ -65,7 +69,12 @@ public class ElevatorServer {
         get(new Route("/reset") {
             @Override
             public Object handle(Request request, Response response) {
-                elevator.reset(request.queryMap("cause").toString());
+                Integer lowerFloor = request.queryMap("lowerFloor").integerValue();
+                Integer higherFloor = request.queryMap("higherFloor").integerValue();
+                Integer cabinSize = request.queryMap("cabinSize").integerValue();
+                String cause = request.queryMap("cause").toString();
+
+                elevator.reset(lowerFloor, higherFloor, cabinSize, cause);
 
                 return sendOkResponse(response);
             }

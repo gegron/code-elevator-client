@@ -57,8 +57,8 @@ public class BasicElevator extends Elevator {
     }
 
     @Override
-    public void reset(String cause) {
-        super.reset(cause);
+    public void reset(Integer lowerFloor, Integer higherFloor, Integer cabinSize, String cause) {
+        super.reset(lowerFloor, higherFloor, cabinSize, cause);
 
         doorsAlreadyOpenAtThisLevel = false;
     }

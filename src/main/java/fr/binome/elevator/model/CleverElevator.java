@@ -36,20 +36,21 @@ public class CleverElevator extends Elevator {
         }
     }};
 
-    private Map<Integer, Boolean> getCalls(String way) {
-        if (ElevatorResponse.valueOf(way) == UP) {
-            return callsUp;
+    @Override
+    public void reset(Integer lowerFloor, Integer higherFloor, Integer cabinSize, String cause) {
+        super.reset(lowerFloor, higherFloor, cabinSize, cause);
+
+        doorsAlreadyOpenAtThisLevel = false;
+
+        destinations.clear();
+        callsUp.clear();
+        callsDown.clear();
+
+        for (int i = MIN_LEVEL; i <= MAX_LEVEL; i++) {
+            destinations.put(i, false);
+            callsUp.put(i, false);
+            callsDown.put(i, false);
         }
-
-        if (ElevatorResponse.valueOf(way) == DOWN) {
-            return callsDown;
-        }
-
-        return null;
-    }
-
-    private Map<Integer, Boolean> getCalls(ElevatorResponse inWay) {
-        return getCalls(inWay.name());
     }
 
     @Override
@@ -72,7 +73,7 @@ public class CleverElevator extends Elevator {
             return closeDoor();
         }
 
-        if (doorsMustOpenAtThisLevel() && !doorsAlreadyOpenAtThisLevel) {
+        if (doorsMustOpenAtThisLevel() && doorsCanOpenAtThisLevel() && !doorsAlreadyOpenAtThisLevel) {
             return openDoor();
         }
         else {
@@ -80,8 +81,9 @@ public class CleverElevator extends Elevator {
         }
     }
 
-    private boolean hasAtLeastOneCallNoMatterWay(int level) {
-        return (callsUp.get(level) || callsDown.get(level));
+    @VisibleForTesting
+    boolean doorsCanOpenAtThisLevel() {
+        return cabinPersonCount < CABIN_SIZE;
     }
 
     @VisibleForTesting
@@ -99,38 +101,6 @@ public class CleverElevator extends Elevator {
         }
 
         return (destinations.get(currentLevel) || mustOpen);
-    }
-
-    @VisibleForTesting
-    Integer getHighestCallLevel() {
-        List<Integer> allCalls = Lists.newArrayList();
-
-        allCalls.addAll(filterTrue(destinations));
-        allCalls.addAll(filterTrue(callsUp));
-        allCalls.addAll(filterTrue(callsDown));
-
-        return allCalls.isEmpty() ? MAX_LEVEL : Ordering.natural().max(allCalls);
-    }
-
-    @VisibleForTesting
-    Integer getLowestCallLevel() {
-        List<Integer> allCalls = Lists.newArrayList();
-
-        allCalls.addAll(filterTrue(destinations));
-        allCalls.addAll(filterTrue(callsUp));
-        allCalls.addAll(filterTrue(callsDown));
-
-        return allCalls.isEmpty() ? MIN_LEVEL : Ordering.natural().min(allCalls);
-    }
-
-    private List<Integer> filterTrue(final Map<Integer, Boolean> calls) {
-
-        return Lists.newArrayList(Iterables.filter(calls.keySet(), new Predicate<Integer>() {
-            @Override
-            public boolean apply(@Nullable Integer level) {
-                return calls.get(level);
-            }
-        }));
     }
 
     @VisibleForTesting
@@ -169,6 +139,54 @@ public class CleverElevator extends Elevator {
         return way;
     }
 
+    @VisibleForTesting
+    Integer getHighestCallLevel() {
+        List<Integer> allCalls = Lists.newArrayList();
+
+        allCalls.addAll(filterTrue(destinations));
+        allCalls.addAll(filterTrue(callsUp));
+        allCalls.addAll(filterTrue(callsDown));
+
+        return allCalls.isEmpty() ? MAX_LEVEL : Ordering.natural().max(allCalls);
+    }
+
+    @VisibleForTesting
+    Integer getLowestCallLevel() {
+        List<Integer> allCalls = Lists.newArrayList();
+
+        allCalls.addAll(filterTrue(destinations));
+        allCalls.addAll(filterTrue(callsUp));
+        allCalls.addAll(filterTrue(callsDown));
+
+        return allCalls.isEmpty() ? MIN_LEVEL : Ordering.natural().min(allCalls);
+    }
+
+    private List<Integer> filterTrue(final Map<Integer, Boolean> calls) {
+
+        return Lists.newArrayList(Iterables.filter(calls.keySet(), new Predicate<Integer>() {
+            @Override
+            public boolean apply(@Nullable Integer level) {
+                return calls.get(level);
+            }
+        }));
+    }
+
+    private Map<Integer, Boolean> getCalls(String way) {
+        if (ElevatorResponse.valueOf(way) == UP) {
+            return callsUp;
+        }
+
+        if (ElevatorResponse.valueOf(way) == DOWN) {
+            return callsDown;
+        }
+
+        return null;
+    }
+
+    private Map<Integer, Boolean> getCalls(ElevatorResponse inWay) {
+        return getCalls(inWay.name());
+    }
+
     private void adjustLevel() {
         if (way == UP) {
             currentLevel++;
@@ -176,6 +194,10 @@ public class CleverElevator extends Elevator {
         else if (way == DOWN) {
             currentLevel--;
         }
+    }
+
+    private boolean hasAtLeastOneCallNoMatterWay(int level) {
+        return (callsUp.get(level) || callsDown.get(level));
     }
 
     private boolean needToGoUp() {
