@@ -83,7 +83,7 @@ public class CleverElevator extends Elevator {
 
     @VisibleForTesting
     boolean doorsCanOpenAtThisLevel() {
-        return cabinPersonCount < CABIN_SIZE;
+        return destinations.get(currentLevel) || cabinPersonCount < CABIN_SIZE;
     }
 
     @VisibleForTesting
