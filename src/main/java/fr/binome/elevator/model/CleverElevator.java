@@ -1,15 +1,12 @@
 package fr.binome.elevator.model;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import fr.binome.elevator.model.context.CallContext;
+import fr.binome.elevator.model.context.ElevatorContext;
 
-import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static fr.binome.elevator.model.ElevatorResponse.*;
 
@@ -18,53 +15,27 @@ public class CleverElevator extends Elevator {
     // TODO: Rethink because of elevator empty + person calls at the current floor
     private boolean doorsAlreadyOpenAtThisLevel = false;
 
-    private Map<Integer, Boolean> destinations = new HashMap<Integer, Boolean>() {{
-        for (int i = MIN_LEVEL; i <= MAX_LEVEL; i++) {
-            put(i, false);
-        }
-    }};
+    private final ElevatorContext elevatorContext;
 
-    private Map<Integer, Boolean> callsUp = new HashMap<Integer, Boolean>() {{
-        for (int i = MIN_LEVEL; i <= MAX_LEVEL; i++) {
-            put(i, false);
-        }
-    }};
+    private CallContext destinations;
 
-    private Map<Integer, Boolean> callsDown = new HashMap<Integer, Boolean>() {{
-        for (int i = MIN_LEVEL; i <= MAX_LEVEL; i++) {
-            put(i, false);
-        }
-    }};
+    public CleverElevator(ElevatorContext elevatorContext) {
+        this.elevatorContext = elevatorContext;
+
+        destinations = new CallContext(elevatorContext.MIN_LEVEL, elevatorContext.MAX_LEVEL);
+    }
 
     @Override
-    public void reset(Integer lowerFloor, Integer higherFloor, Integer cabinSize, String cause) {
-        super.reset(lowerFloor, higherFloor, cabinSize, cause);
+    public void reset(Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
+        super.reset(lowerFloor, higherFloor, cabinSize);
 
         doorsAlreadyOpenAtThisLevel = false;
-
-        destinations.clear();
-        callsUp.clear();
-        callsDown.clear();
-
-        for (int i = MIN_LEVEL; i <= MAX_LEVEL; i++) {
-            destinations.put(i, false);
-            callsUp.put(i, false);
-            callsDown.put(i, false);
-        }
+        destinations = new CallContext(elevatorContext.MIN_LEVEL, elevatorContext.MAX_LEVEL);
     }
 
     @Override
     public void go(Integer floorToGo) {
-        destinations.put(floorToGo, true);
-    }
-
-    @Override
-    public void call(Integer floorLevel, String way) {
-        Map<Integer, Boolean> calls = getCalls(way);
-
-        if (calls != null) {
-            calls.put(floorLevel, true);
-        }
+        destinations.addCall(floorToGo);
     }
 
     @Override
@@ -73,7 +44,7 @@ public class CleverElevator extends Elevator {
             return closeDoor();
         }
 
-        if (doorsMustOpenAtThisLevel() && doorsCanOpenAtThisLevel() && !doorsAlreadyOpenAtThisLevel) {
+        if (doorsMustOpenAtThisLevel(elevatorContext) && doorsCanOpenAtThisLevel() && !doorsAlreadyOpenAtThisLevel) {
             return openDoor();
         }
         else {
@@ -83,12 +54,13 @@ public class CleverElevator extends Elevator {
 
     @VisibleForTesting
     boolean doorsCanOpenAtThisLevel() {
-        return destinations.get(currentLevel) || cabinPersonCount < CABIN_SIZE;
+        return destinations.hasCallAtThisLevel(currentLevel) || cabinPersonCount < CABIN_SIZE;
     }
 
     @VisibleForTesting
-    boolean doorsMustOpenAtThisLevel() {
-        Map<Integer, Boolean> calls = getCalls(way);
+    boolean doorsMustOpenAtThisLevel(ElevatorContext elevatorContext) {
+        CallContext calls = elevatorContext.getCalls(way);
+
         boolean mustOpen;
 
         // Special case if we are at the maximum level or minimum level:
@@ -97,10 +69,10 @@ public class CleverElevator extends Elevator {
             mustOpen = hasAtLeastOneCallNoMatterWay(currentLevel);
         }
         else {
-            mustOpen = (calls != null && calls.get(currentLevel));
+            mustOpen = (calls != null && calls.hasCallAtThisLevel(currentLevel));
         }
 
-        return (destinations.get(currentLevel) || mustOpen);
+        return (destinations.hasCallAtThisLevel(currentLevel) || mustOpen);
     }
 
     @VisibleForTesting
@@ -143,9 +115,9 @@ public class CleverElevator extends Elevator {
     Integer getHighestCallLevel() {
         List<Integer> allCalls = Lists.newArrayList();
 
-        allCalls.addAll(filterTrue(destinations));
-        allCalls.addAll(filterTrue(callsUp));
-        allCalls.addAll(filterTrue(callsDown));
+        allCalls.addAll(destinations.getCallLevels());
+        allCalls.addAll(elevatorContext.getCalls(ElevatorResponse.UP).getCallLevels());
+        allCalls.addAll(elevatorContext.getCalls(ElevatorResponse.DOWN).getCallLevels());
 
         return allCalls.isEmpty() ? MAX_LEVEL : Ordering.natural().max(allCalls);
     }
@@ -154,37 +126,11 @@ public class CleverElevator extends Elevator {
     Integer getLowestCallLevel() {
         List<Integer> allCalls = Lists.newArrayList();
 
-        allCalls.addAll(filterTrue(destinations));
-        allCalls.addAll(filterTrue(callsUp));
-        allCalls.addAll(filterTrue(callsDown));
+        allCalls.addAll(destinations.getCallLevels());
+        allCalls.addAll(elevatorContext.getCalls(UP).getCallLevels());
+        allCalls.addAll(elevatorContext.getCalls(DOWN).getCallLevels());
 
         return allCalls.isEmpty() ? MIN_LEVEL : Ordering.natural().min(allCalls);
-    }
-
-    private List<Integer> filterTrue(final Map<Integer, Boolean> calls) {
-
-        return Lists.newArrayList(Iterables.filter(calls.keySet(), new Predicate<Integer>() {
-            @Override
-            public boolean apply(@Nullable Integer level) {
-                return calls.get(level);
-            }
-        }));
-    }
-
-    private Map<Integer, Boolean> getCalls(String way) {
-        if (ElevatorResponse.valueOf(way) == UP) {
-            return callsUp;
-        }
-
-        if (ElevatorResponse.valueOf(way) == DOWN) {
-            return callsDown;
-        }
-
-        return null;
-    }
-
-    private Map<Integer, Boolean> getCalls(ElevatorResponse inWay) {
-        return getCalls(inWay.name());
     }
 
     private void adjustLevel() {
@@ -197,7 +143,7 @@ public class CleverElevator extends Elevator {
     }
 
     private boolean hasAtLeastOneCallNoMatterWay(int level) {
-        return (callsUp.get(level) || callsDown.get(level));
+        return (elevatorContext.getCalls(UP).hasCallAtThisLevel(level) || elevatorContext.getCalls(DOWN).hasCallAtThisLevel(level));
     }
 
     private boolean needToGoUp() {
@@ -212,7 +158,7 @@ public class CleverElevator extends Elevator {
         boolean res = false;
 
         for (int i = currentLevel + 1; i <= MAX_LEVEL; i++) {
-            res = res || destinations.get(i);
+            res = res || destinations.hasCallAtThisLevel(i);
         }
 
         return res;
@@ -222,7 +168,7 @@ public class CleverElevator extends Elevator {
         boolean res = false;
 
         for (int i = currentLevel - 1; i >= MIN_LEVEL; i--) {
-            res = res || destinations.get(i);
+            res = res || destinations.hasCallAtThisLevel(i);
         }
 
         return res;
@@ -251,9 +197,10 @@ public class CleverElevator extends Elevator {
     private ElevatorResponse openDoor() {
         doorsAlreadyOpenAtThisLevel = true;
 
-        destinations.put(currentLevel, false);
-        callsUp.put(currentLevel, false);
-        callsDown.put(currentLevel, false);
+
+        destinations.resetCall(currentLevel);
+        elevatorContext.getCalls(UP).resetCall(currentLevel);
+        elevatorContext.getCalls(DOWN).resetCall(currentLevel);
 
         return stateDoors = OPEN;
     }

@@ -17,11 +17,9 @@ public abstract class Elevator {
 
     public abstract void go(Integer floorToGo);
 
-    public abstract void call(Integer atFloor, String way);
-
     public abstract ElevatorResponse nextCommand();
 
-    public void reset(Integer lowerFloor, Integer higherFloor, Integer cabinSize, String cause) {
+    public void reset(Integer lowerFloor, Integer higherFloor, Integer cabinSize) {
         MIN_LEVEL = lowerFloor;
         MAX_LEVEL = higherFloor;
         CABIN_SIZE = cabinSize;

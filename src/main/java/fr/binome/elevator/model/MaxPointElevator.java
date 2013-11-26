@@ -12,11 +12,6 @@ public class MaxPointElevator extends Elevator {
     }
 
     @Override
-    public void call(Integer atFloor, String way) {
-        context.call(atFloor, ElevatorResponse.valueOf(way));
-    }
-
-    @Override
     public ElevatorResponse nextCommand() {
         return null;
     }
