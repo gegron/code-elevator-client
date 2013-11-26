@@ -66,7 +66,7 @@ public class CleverElevator extends Elevator {
         // Special case if we are at the maximum level or minimum level:
         //  in that case we open the doors to passengers going in the other way (they can only go one way)
         if ((way == DOWN && currentLevel == getLowestCallLevel()) || (way == UP && currentLevel == getHighestCallLevel())) {
-            mustOpen = hasAtLeastOneCallNoMatterWay(currentLevel);
+            mustOpen = elevatorContext.hasAtLeastOneCall(currentLevel);
         }
         else {
             mustOpen = (calls != null && calls.hasCallAtThisLevel(currentLevel));
@@ -142,61 +142,16 @@ public class CleverElevator extends Elevator {
         }
     }
 
-    private boolean hasAtLeastOneCallNoMatterWay(int level) {
-        return (elevatorContext.getCalls(UP).hasCallAtThisLevel(level) || elevatorContext.getCalls(DOWN).hasCallAtThisLevel(level));
-    }
-
     private boolean needToGoUp() {
-        return (atLeastOneHeadedUp() || atLeastOneCallHigher());
+        return (destinations.higherCallExist(currentLevel) || elevatorContext.higherCallExist(currentLevel));
     }
 
     private boolean needToGoDown() {
-        return (atLeastOneHeadedDown() || atLeastOneCallLower());
-    }
-
-    private boolean atLeastOneHeadedUp() {
-        boolean res = false;
-
-        for (int i = currentLevel + 1; i <= MAX_LEVEL; i++) {
-            res = res || destinations.hasCallAtThisLevel(i);
-        }
-
-        return res;
-    }
-
-    private boolean atLeastOneHeadedDown() {
-        boolean res = false;
-
-        for (int i = currentLevel - 1; i >= MIN_LEVEL; i--) {
-            res = res || destinations.hasCallAtThisLevel(i);
-        }
-
-        return res;
-    }
-
-    private boolean atLeastOneCallHigher() {
-        boolean res = false;
-
-        for (int i = currentLevel + 1; i <= MAX_LEVEL; i++) {
-            res = res || hasAtLeastOneCallNoMatterWay(i);
-        }
-
-        return res;
-    }
-
-    private boolean atLeastOneCallLower() {
-        boolean res = false;
-
-        for (int i = currentLevel - 1; i >= MIN_LEVEL; i--) {
-            res = res || hasAtLeastOneCallNoMatterWay(i);
-        }
-
-        return res;
+        return (destinations.lowerCallExist(currentLevel) || elevatorContext.lowerCallExist(currentLevel));
     }
 
     private ElevatorResponse openDoor() {
         doorsAlreadyOpenAtThisLevel = true;
-
 
         destinations.resetCall(currentLevel);
         elevatorContext.getCalls(UP).resetCall(currentLevel);

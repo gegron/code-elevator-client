@@ -1,6 +1,5 @@
 package fr.binome.elevator.server;
 
-import fr.binome.elevator.model.ElevatorResponse;
 import fr.binome.elevator.model.context.ElevatorContext;
 import spark.Request;
 import spark.Response;

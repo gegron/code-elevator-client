@@ -78,6 +78,10 @@ public class ElevatorContext {
         elevators.get(cabin).userHasExited();
     }
 
+    public CallContext getCalls(ElevatorResponse inWay) {
+        return getCalls(inWay.name());
+    }
+
     private CallContext getCalls(String way) {
         if (ElevatorResponse.valueOf(way) == UP) {
             return callsUp;
@@ -90,8 +94,16 @@ public class ElevatorContext {
         return null;
     }
 
-    public CallContext getCalls(ElevatorResponse inWay) {
-        return getCalls(inWay.name());
+    public Boolean higherCallExist(Integer currentLevel) {
+        return callsUp.higherCallExist(currentLevel) || callsDown.higherCallExist(currentLevel);
+    }
+
+    public Boolean lowerCallExist(int currentLevel) {
+        return callsUp.lowerCallExist(currentLevel) || callsDown.lowerCallExist(currentLevel);
+    }
+
+    public Boolean hasAtLeastOneCall(int currentLevel) {
+        return callsUp.hasCallAtThisLevel(currentLevel) || callsDown.hasCallAtThisLevel(currentLevel);
     }
 
 }

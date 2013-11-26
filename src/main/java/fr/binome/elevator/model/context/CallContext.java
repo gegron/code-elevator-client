@@ -5,7 +5,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,6 @@ public class CallContext {
     private Map<Integer, Boolean> calls;
     private Integer minLevel;
     private Integer maxLevel;
-    private Collection<? extends Integer> callLevels;
 
     public CallContext(Integer minLevel, Integer maxLevel) {
         this.minLevel = minLevel;
@@ -46,6 +44,26 @@ public class CallContext {
                 return calls.get(level);
             }
         }));
+    }
+
+    public Boolean higherCallExist(int currentLevel) {
+        boolean res = false;
+
+        for (int i = currentLevel + 1; i <= maxLevel; i++) {
+            res = res || hasCallAtThisLevel(i);
+        }
+
+        return res;
+    }
+
+    public Boolean lowerCallExist(int currentLevel) {
+        boolean res = false;
+
+        for (int i = currentLevel - 1; i >= minLevel; i--) {
+            res = res || hasCallAtThisLevel(i);
+        }
+
+        return res;
     }
 
 }
